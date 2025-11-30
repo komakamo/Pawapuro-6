@@ -108,6 +108,13 @@ class AudioEngine {
 const audio = new AudioEngine();
 
 // --- Types & Constants ---
+const STANDARD_STAT_CAP = 99;
+const VELOCITY_STAT_CAP = 160;
+
+const clampStatIncrease = (current: number, increment: number, cap: number) => {
+  const newValue = Math.min(cap, current + increment);
+  return { newValue, increased: newValue > current };
+};
 
 const TEAMS_CONFIG = [
   { id: 'dragons', name: 'NEO DRAGONS', short: 'NDR', color: 'bg-red-600', neon: 'shadow-[0_0_10px_#ef4444] border-red-500 text-red-400' },
@@ -510,19 +517,48 @@ export default function CyberPennant() {
              p.growthExp -= 200;
              // Stat up based on practice type
              let stat = '';
+             let statIncreased = false;
+             let appliedCap = STANDARD_STAT_CAP;
              if (type === 'batting') {
-                if(Math.random() > 0.5) { p.power++; stat='パワー'; } else { p.contact++; stat='ミート'; }
+                if(Math.random() > 0.5) { 
+                  const { newValue, increased } = clampStatIncrease(p.power, 1, STANDARD_STAT_CAP);
+                  p.power = newValue; stat='パワー'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+                } else { 
+                  const { newValue, increased } = clampStatIncrease(p.contact, 1, STANDARD_STAT_CAP);
+                  p.contact = newValue; stat='ミート'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+                }
              } else if (type === 'speed') {
-                p.speed++; stat='走力';
+                const { newValue, increased } = clampStatIncrease(p.speed, 1, STANDARD_STAT_CAP);
+                p.speed = newValue; stat='走力'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
              } else if (type === 'defense') {
-                if(Math.random() > 0.5) { p.defense++; stat='守備'; } else { p.arm++; stat='肩力'; }
+                if(Math.random() > 0.5) { 
+                  const { newValue, increased } = clampStatIncrease(p.defense, 1, STANDARD_STAT_CAP);
+                  p.defense = newValue; stat='守備'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+                } else { 
+                  const { newValue, increased } = clampStatIncrease(p.arm, 1, STANDARD_STAT_CAP);
+                  p.arm = newValue; stat='肩力'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+                }
              } else if (type === 'pitching') {
                 const r = Math.random();
-                if(r < 0.3) { p.speed++; stat='球速'; }
-                else if(r < 0.6) { p.control++; stat='コン'; }
-                else { p.stamina++; stat='スタ'; }
+                if(r < 0.3) { 
+                  const { newValue, increased } = clampStatIncrease(p.speed, 1, VELOCITY_STAT_CAP);
+                  p.speed = newValue; stat='球速'; statIncreased = increased; appliedCap = VELOCITY_STAT_CAP;
+                }
+                else if(r < 0.6) { 
+                  const { newValue, increased } = clampStatIncrease(p.control, 1, STANDARD_STAT_CAP);
+                  p.control = newValue; stat='コン'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+                }
+                else { 
+                  const { newValue, increased } = clampStatIncrease(p.stamina, 1, STANDARD_STAT_CAP);
+                  p.stamina = newValue; stat='スタ'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+                }
              }
-             reportLines.push(`${p.name} -> ${stat} UP!`);
+             if (stat) {
+               const message = statIncreased
+                 ? `${p.name} -> ${stat} UP!`
+                 : `${p.name} -> ${stat} は上限(${appliedCap})に達しています`;
+               reportLines.push(message);
+             }
           }
           newPlayers[idx] = p;
           count++;
