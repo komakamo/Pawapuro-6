@@ -366,28 +366,28 @@ const simulateMatch = (home: Team, away: Team, day: number): { result: GameResul
 
       newP.growthExp += Math.floor(xpGained);
 
-      if (newP.growthExp >= 200) {
-         newP.growthExp -= 200;
-         const growthAmount = Math.floor(Math.random() * 2) + 1;
-         let statGrown = '';
-         if (newP.position === 'P') {
-             const roll = Math.random();
-             if (roll < 0.3 && newP.stamina < 99) { newP.stamina += growthAmount; statGrown = 'スタミナ'; }
-             else if (roll < 0.6 && newP.control < 99) { newP.control += growthAmount; statGrown = 'コントロール'; }
-             else if (roll < 0.8 && newP.speed < 160) { newP.speed += 1; statGrown = '球速'; }
-             else if (roll < 0.9 && newP.arm < 99) { newP.arm += growthAmount; statGrown = '肩力'; } // 投手も肩は上がる
-         } else {
-             const roll = Math.random();
-             if (roll < 0.2 && newP.contact < 99) { newP.contact += growthAmount; statGrown = 'ミート'; }
-             else if (roll < 0.4 && newP.power < 99) { newP.power += growthAmount; statGrown = 'パワー'; }
-             else if (roll < 0.6 && newP.speed < 99) { newP.speed += growthAmount; statGrown = '走力'; }
-             else if (roll < 0.8 && newP.defense < 99) { newP.defense += growthAmount; statGrown = '守備力'; }
-             else if (roll < 0.9 && newP.arm < 99) { newP.arm += growthAmount; statGrown = '肩力'; }
-             else if (newP.catching < 99) { newP.catching += growthAmount; statGrown = '捕球'; }
-         }
-         if (statGrown) {
-             growthEvents.push(`[SYSTEM] ${newP.name} :: ${statGrown} UPGRADE`);
-         }
+      while (newP.growthExp >= 200) {
+        newP.growthExp -= 200;
+        const growthAmount = Math.floor(Math.random() * 2) + 1;
+        let statGrown = '';
+        if (newP.position === 'P') {
+          const roll = Math.random();
+          if (roll < 0.3 && newP.stamina < 99) { newP.stamina += growthAmount; statGrown = 'スタミナ'; }
+          else if (roll < 0.6 && newP.control < 99) { newP.control += growthAmount; statGrown = 'コントロール'; }
+          else if (roll < 0.8 && newP.speed < 160) { newP.speed += 1; statGrown = '球速'; }
+          else if (roll < 0.9 && newP.arm < 99) { newP.arm += growthAmount; statGrown = '肩力'; } // 投手も肩は上がる
+        } else {
+          const roll = Math.random();
+          if (roll < 0.2 && newP.contact < 99) { newP.contact += growthAmount; statGrown = 'ミート'; }
+          else if (roll < 0.4 && newP.power < 99) { newP.power += growthAmount; statGrown = 'パワー'; }
+          else if (roll < 0.6 && newP.speed < 99) { newP.speed += growthAmount; statGrown = '走力'; }
+          else if (roll < 0.8 && newP.defense < 99) { newP.defense += growthAmount; statGrown = '守備力'; }
+          else if (roll < 0.9 && newP.arm < 99) { newP.arm += growthAmount; statGrown = '肩力'; }
+          else if (newP.catching < 99) { newP.catching += growthAmount; statGrown = '捕球'; }
+        }
+        if (statGrown) {
+          growthEvents.push(`[SYSTEM] ${newP.name} :: ${statGrown} UPGRADE`);
+        }
       }
       return newP;
     });
@@ -513,52 +513,52 @@ export default function CyberPennant() {
           p.growthExp += xpGain;
 
           // Check level up
-          if (p.growthExp >= 200) {
-             p.growthExp -= 200;
-             // Stat up based on practice type
-             let stat = '';
-             let statIncreased = false;
-             let appliedCap = STANDARD_STAT_CAP;
-             if (type === 'batting') {
-                if(Math.random() > 0.5) { 
-                  const { newValue, increased } = clampStatIncrease(p.power, 1, STANDARD_STAT_CAP);
-                  p.power = newValue; stat='パワー'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
-                } else { 
-                  const { newValue, increased } = clampStatIncrease(p.contact, 1, STANDARD_STAT_CAP);
-                  p.contact = newValue; stat='ミート'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
-                }
-             } else if (type === 'speed') {
-                const { newValue, increased } = clampStatIncrease(p.speed, 1, STANDARD_STAT_CAP);
-                p.speed = newValue; stat='走力'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
-             } else if (type === 'defense') {
-                if(Math.random() > 0.5) { 
-                  const { newValue, increased } = clampStatIncrease(p.defense, 1, STANDARD_STAT_CAP);
-                  p.defense = newValue; stat='守備'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
-                } else { 
-                  const { newValue, increased } = clampStatIncrease(p.arm, 1, STANDARD_STAT_CAP);
-                  p.arm = newValue; stat='肩力'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
-                }
-             } else if (type === 'pitching') {
-                const r = Math.random();
-                if(r < 0.3) { 
-                  const { newValue, increased } = clampStatIncrease(p.speed, 1, VELOCITY_STAT_CAP);
-                  p.speed = newValue; stat='球速'; statIncreased = increased; appliedCap = VELOCITY_STAT_CAP;
-                }
-                else if(r < 0.6) { 
-                  const { newValue, increased } = clampStatIncrease(p.control, 1, STANDARD_STAT_CAP);
-                  p.control = newValue; stat='コン'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
-                }
-                else { 
-                  const { newValue, increased } = clampStatIncrease(p.stamina, 1, STANDARD_STAT_CAP);
-                  p.stamina = newValue; stat='スタ'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
-                }
-             }
-             if (stat) {
-               const message = statIncreased
-                 ? `${p.name} -> ${stat} UP!`
-                 : `${p.name} -> ${stat} は上限(${appliedCap})に達しています`;
-               reportLines.push(message);
-             }
+          while (p.growthExp >= 200) {
+            p.growthExp -= 200;
+            // Stat up based on practice type
+            let stat = '';
+            let statIncreased = false;
+            let appliedCap = STANDARD_STAT_CAP;
+            if (type === 'batting') {
+              if(Math.random() > 0.5) {
+                const { newValue, increased } = clampStatIncrease(p.power, 1, STANDARD_STAT_CAP);
+                p.power = newValue; stat='パワー'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+              } else {
+                const { newValue, increased } = clampStatIncrease(p.contact, 1, STANDARD_STAT_CAP);
+                p.contact = newValue; stat='ミート'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+              }
+            } else if (type === 'speed') {
+              const { newValue, increased } = clampStatIncrease(p.speed, 1, STANDARD_STAT_CAP);
+              p.speed = newValue; stat='走力'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+            } else if (type === 'defense') {
+              if(Math.random() > 0.5) {
+                const { newValue, increased } = clampStatIncrease(p.defense, 1, STANDARD_STAT_CAP);
+                p.defense = newValue; stat='守備'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+              } else {
+                const { newValue, increased } = clampStatIncrease(p.arm, 1, STANDARD_STAT_CAP);
+                p.arm = newValue; stat='肩力'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+              }
+            } else if (type === 'pitching') {
+              const r = Math.random();
+              if(r < 0.3) {
+                const { newValue, increased } = clampStatIncrease(p.speed, 1, VELOCITY_STAT_CAP);
+                p.speed = newValue; stat='球速'; statIncreased = increased; appliedCap = VELOCITY_STAT_CAP;
+              }
+              else if(r < 0.6) {
+                const { newValue, increased } = clampStatIncrease(p.control, 1, STANDARD_STAT_CAP);
+                p.control = newValue; stat='コン'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+              }
+              else {
+                const { newValue, increased } = clampStatIncrease(p.stamina, 1, STANDARD_STAT_CAP);
+                p.stamina = newValue; stat='スタ'; statIncreased = increased; appliedCap = STANDARD_STAT_CAP;
+              }
+            }
+            if (stat) {
+              const message = statIncreased
+                ? `${p.name} -> ${stat} UP!`
+                : `${p.name} -> ${stat} は上限(${appliedCap})に達しています`;
+              reportLines.push(message);
+            }
           }
           newPlayers[idx] = p;
           count++;
