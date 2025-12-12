@@ -412,6 +412,7 @@ const simulateMatch = (home: Team, away: Team, day: number): { result: GameResul
 
 export default function CyberPennant() {
   const TOTAL_GAMES = 143;
+  const REQUIRED_TEAM_COUNT = 6;
   const [teams, setTeams] = useState<Team[]>([]);
   const [currentDay, setCurrentDay] = useState(1);
   const [gameHistory, setGameHistory] = useState<GameResult[]>([]);
@@ -454,6 +455,7 @@ export default function CyberPennant() {
 
   const playDay = () => {
     if (currentDay > TOTAL_GAMES) return;
+    if (teams.length < REQUIRED_TEAM_COUNT) return;
 
     // Reset daily practice limit
     setHasPracticed(false);
