@@ -489,10 +489,27 @@ export default function CyberPennant() {
   };
 
   const handlePractice = (type: 'batting' | 'speed' | 'defense' | 'pitching') => {
+    if (teams.length === 0) {
+      setPracticeReport({
+        title: 'SYSTEM // TRAINING ON HOLD',
+        lines: ['チームデータをロード中です。完了までお待ちください。'],
+      });
+      return;
+    }
+
     if (hasPracticed) return;
     if (soundEnabled) audio.playLevelUp();
 
-    const targetTeamId = selectedTeamId || teams[0].id;
+    const defaultTeam = teams[0];
+    const targetTeamId = selectedTeamId || defaultTeam?.id;
+    if (!targetTeamId) {
+      setPracticeReport({
+        title: 'SYSTEM // TRAINING ON HOLD',
+        lines: ['チームがロードされていません。しばらく待ってから再度お試しください。'],
+      });
+      return;
+    }
+
     const teamIndex = teams.findIndex(t => t.id === targetTeamId);
     if (teamIndex === -1) return;
 
